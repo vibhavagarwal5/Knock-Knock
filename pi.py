@@ -60,9 +60,12 @@ while True :
         snap_return_code = call(take_snap_cmd, shell=True)
         print "Snapshot return code is ", snap_return_code
 
+	close_cam_cmd="pkill fswebcam"
+	call_close_cmd=call(close_cam_cmd,shell=True)
+
         print "\n\n************************** Uploading on Git ***********************\n\n"
 
-        git_upload = "git add " + snap_dir + \
+        git_upload = "git add ." + \
                   "; git commit -m \"another visitor\" " + snap_dir + \
                   "; git push"
         git_return_code = call(git_upload, shell=True)
@@ -77,3 +80,5 @@ while True :
                             body="Hey, you have a visitor at the front door: " +
                             "https://raw.githubusercontent.com/rdachere/whosthere/master/snaps/"+snap_filename
                         )
+        print "\n\n****************************  SMS Sent  **********************\n\n"
+    sleep(15)
