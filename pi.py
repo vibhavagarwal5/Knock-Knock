@@ -28,7 +28,7 @@ while True :
     GPIO.setup(ECHO,GPIO.IN)
     GPIO.output(TRIG, False)
     print "Waiting For Sensor To Settle"
-    sleep(2)
+    sleep(3)
 
     GPIO.output(TRIG, True)
     sleep(0.00001)
@@ -53,14 +53,14 @@ while True :
     if distance<MAX_TRIGGER_DISTANCE and distance>MIN_TRIGGER_DISTANCE:
         now = datetime.datetime.now()
     	snap_filename = "visitor-%d:%d:%d-%d:%d:%d.jpg" % (now.year, now.month, now.day, now.hour, now.minute, now.second)
-        take_snap_cmd = "fswebcam "+ snap_dir + snap_filename
+        take_snap_cmd = "fswebcam -d /dev/video0 "+ snap_dir + snap_filename
 
         print "\n\n************************** Taking a Snapshot  ************************ \n\n"
 
         snap_return_code = call(take_snap_cmd, shell=True)
         print "Snapshot return code is ", snap_return_code
 
-	close_cam_cmd="pkill fswebcam"
+	close_cam_cmd="sudo fswebcam -b"
 	call_close_cmd=call(close_cam_cmd,shell=True)
 
         print "\n\n************************** Uploading on Git ***********************\n\n"
@@ -74,11 +74,12 @@ while True :
         print "\n\n****************************  Sending SMS  **********************\n\n"
 
         message = client.messages.create(
-                            to="+919999012119",
+                            to="+919810778985",
                             #check this no if not working..
                             from_="+13213513859",
                             body="Hey, you have a visitor at the front door: " +
-                            "https://raw.githubusercontent.com/rdachere/whosthere/master/snaps/"+snap_filename
+                            "https://raw.githubusercontent.com/vibhavagarwal5/Knock-Knock/master/snaps/"+snap_filename
                         )
         print "\n\n****************************  SMS Sent  **********************\n\n"
     sleep(15)
+    
