@@ -4,6 +4,12 @@ from time import time, sleep
 import datetime
 from twilio.rest import Client
 
+import urllib2
+import cookielib
+from getpass import getpass
+import sys
+import os
+from stat import *
 
 
 
@@ -16,6 +22,10 @@ VALID_PIC_THRESHOLD = 5     # weak attempt at mitigating "noise" (butterfly/moth
 account_sid = "AC87fbb7affe55b87c4e2a8cf3a64abe26"
 auth_token = "574245ac21cf74a3d183f444a0bd9607"
 client = Client(account_sid, auth_token)
+
+username = "9810778985"
+passwd = "thanks123"
+number="9999012119"
 
 while True :
     GPIO.setmode(GPIO.BCM)
@@ -54,14 +64,10 @@ while True :
         now = datetime.datetime.now()
     	snap_filename = "visitor-%d:%d:%d-%d:%d:%d.jpg" % (now.year, now.month, now.day, now.hour, now.minute, now.second)
         take_snap_cmd = "fswebcam -d /dev/video0 "+ snap_dir + snap_filename
-
         print "\n\n************************** Taking a Snapshot  ************************ \n\n"
 
         snap_return_code = call(take_snap_cmd, shell=True)
         print "Snapshot return code is ", snap_return_code
-
-	close_cam_cmd="sudo fswebcam -b"
-	call_close_cmd=call(close_cam_cmd,shell=True)
 
         print "\n\n************************** Uploading on Git ***********************\n\n"
 
@@ -73,13 +79,34 @@ while True :
 
         print "\n\n****************************  Sending SMS  **********************\n\n"
 
-        message = client.messages.create(
-                            to="+919810778985",
-                            #check this no if not working..
-                            from_="+13213513859",
-                            body="Hey, you have a visitor at the front door: " +
-                            "https://raw.githubusercontent.com/vibhavagarwal5/Knock-Knock/master/snaps/"+snap_filename
-                        )
+
+	message="Hey, You have a visitor at your front door "+"https://github.com/vibhavagarwal5/Knock-Knock/tree/master/snaps/"+snap_filename
+   	message = "+".join(message.split(' '))
+
+        url ='http://site24.way2sms.com/Login1.action?'
+        data = 'username='+username+'&password='+passwd+'&Submit=Sign+in'
+
+        cj= cookielib.CookieJar()
+        opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
+
+	opener.addheaders=[('User-Agent','Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120')]
+	try:
+		usock =opener.open(url, data)
+	except IOError:
+		print "error"
+	
+	jession_id =str(cj).split('~')[1].split(' ')[0]
+	send_sms_url = 'http://site24.way2sms.com/smstoss.action?'
+	send_sms_data = 'ssaction=ss&Token='+jession_id+'&mobile='+number+'&message='+message+'&msgLen=136'
+	opener.addheaders=[('Referer', 'http://site25.way2sms.com/sendSMS?Token='+jession_id)]
+	try:
+		sms_sent_page = opener.open(send_sms_url,send_sms_data)
+	except IOError:
+		print "error"
+	
+    	print "success" 
         print "\n\n****************************  SMS Sent  **********************\n\n"
-    sleep(15)
+    sleep(12)
+    #close_cam_cmd="sudo fswebcam -b"
+    #call_close_cmd=call(close_cam_cmd,shell=True)
     
