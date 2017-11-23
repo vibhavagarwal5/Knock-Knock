@@ -2,7 +2,6 @@ from subprocess import call
 import RPi.GPIO as GPIO
 from time import time, sleep
 import datetime
-from twilio.rest import Client
 
 import urllib2
 import cookielib
@@ -12,17 +11,12 @@ import os
 from stat import *
 
 
-
-
-
 snap_dir = "./snaps/"
-MAX_TRIGGER_DISTANCE = 150   
-MIN_TRIGGER_DISTANCE = 30    
-VALID_PIC_THRESHOLD = 5     # weak attempt at mitigating "noise" (butterfly/moth/squirrel)
-account_sid = "AC87fbb7affe55b87c4e2a8cf3a64abe26"
-auth_token = "574245ac21cf74a3d183f444a0bd9607"
-client = Client(account_sid, auth_token)
+MAX_TRIGGER_DISTANCE = 150
+MIN_TRIGGER_DISTANCE = 30
+VALID_PIC_THRESHOLD = 5     # weak attempt at mitigating "noise"
 
+#Way2Sms login details
 username = "9810778985"
 passwd = "thanks123"
 number="9999012119"
@@ -30,8 +24,8 @@ number="9999012119"
 while True :
     GPIO.setmode(GPIO.BCM)
 
-    TRIG = 23
-    ECHO = 24
+    TRIG = 23   #trigger pin of HC-SR04 connected to Pin number 23
+    ECHO = 24   #echo pin of HC-SR04 connected to Pin number 24
 
     print "Distance Measurement In Progress"
     GPIO.setup(TRIG,GPIO.OUT)
@@ -60,6 +54,8 @@ while True :
 
     GPIO.cleanup()
 
+#-------------------------Using the Ultrasonic sensor to measure the distance--------------------------------------
+
     if distance<MAX_TRIGGER_DISTANCE and distance>MIN_TRIGGER_DISTANCE:
         now = datetime.datetime.now()
     	snap_filename = "visitor-%d:%d:%d-%d:%d:%d.jpg" % (now.year, now.month, now.day, now.hour, now.minute, now.second)
@@ -79,6 +75,7 @@ while True :
 
         print "\n\n****************************  Sending SMS  **********************\n\n"
 
+#-----------------------------WAY2SMS implementation code------------------------------------------
 
 	message="Hey, You have a visitor at your front door "+"https://github.com/vibhavagarwal5/Knock-Knock/tree/master/snaps/"+snap_filename
    	message = "+".join(message.split(' '))
@@ -94,7 +91,7 @@ while True :
 		usock =opener.open(url, data)
 	except IOError:
 		print "error"
-	
+
 	jession_id =str(cj).split('~')[1].split(' ')[0]
 	send_sms_url = 'http://site24.way2sms.com/smstoss.action?'
 	send_sms_data = 'ssaction=ss&Token='+jession_id+'&mobile='+number+'&message='+message+'&msgLen=136'
@@ -103,10 +100,9 @@ while True :
 		sms_sent_page = opener.open(send_sms_url,send_sms_data)
 	except IOError:
 		print "error"
-	
-    	print "success" 
+
+    	print "success"
         print "\n\n****************************  SMS Sent  **********************\n\n"
     sleep(12)
     #close_cam_cmd="sudo fswebcam -b"
     #call_close_cmd=call(close_cam_cmd,shell=True)
-    
