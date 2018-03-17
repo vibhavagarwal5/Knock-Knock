@@ -17,9 +17,9 @@ MIN_TRIGGER_DISTANCE = 30
 VALID_PIC_THRESHOLD = 5     # weak attempt at mitigating "noise"
 
 #Way2Sms login details
-username = "9810778985"
-passwd = "thanks123"
-number="9999012119"
+username = ""
+passwd = ""
+number=""
 
 while True :
     GPIO.setmode(GPIO.BCM)
